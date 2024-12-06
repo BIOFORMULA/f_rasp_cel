@@ -76,6 +76,8 @@
 
         // Desenhar a camada superior (capa da raspadinha) em resolução alta
         const capa = new Image();
+        background-image: url('atualizadocapa.png'); /* A imagem de cobertura */
+            background-size: cover;
         capa.src = 'atualizadocapa.png'; // Imagem de cobertura
         capa.onload = () => {
             // Desenha a imagem de capa em resolução alta (considerando devicePixelRatio)
