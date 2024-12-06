@@ -14,18 +14,18 @@
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
-            overflow: hidden; /* Impede a rolagem da página */
+            overflow: hidden;
         }
 
         #raspadinha-container {
             position: fixed; /* Garante que o container fique fixo na tela */
-            top: 50%; /* Centraliza o contêiner verticalmente */
-            left: 50%; /* Centraliza o contêiner horizontalmente */
-            transform: translate(-50%, -50%); /* Ajusta para o centro exato */
-            width: 400px; /* Largura fixa */
-            height: 200px; /* Altura fixa */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 200px;
             touch-action: none; /* Impede gestos de rolagem e zoom */
-            z-index: 10; /* Garante que o canvas e a imagem fiquem acima de outros elementos */
+            z-index: 10;
         }
 
         canvas {
@@ -44,7 +44,7 @@
             width: 100%;
             height: 100%;
             border-radius: 10px;
-            z-index: -1; /* Coloca a imagem de fundo abaixo da camada de raspagem */
+            z-index: -1;
         }
 
         h2 {
@@ -55,17 +55,12 @@
 <body>
     <h2>Raspadinha Virtual Realista</h2>
     <div id="raspadinha-container">
-        <!-- Imagem de fundo (prêmio), vai ficar abaixo da camada de raspagem -->
         <img src="atualizadopremio.png" alt="Prêmio">
-        <!-- Canvas para criar a camada superior (capa que será raspada) -->
         <canvas id="raspadinha"></canvas>
     </div>
     <script>
-        // Configuração inicial
         const canvas = document.getElementById('raspadinha');
         const ctx = canvas.getContext('2d');
-
-        // Ajustar o tamanho do canvas para coincidir com o container fixo (400x200)
         const container = document.getElementById('raspadinha-container');
         const width = container.offsetWidth;
         const height = container.offsetHeight;
@@ -74,80 +69,94 @@
         const devicePixelRatio = window.devicePixelRatio || 1;
         canvas.width = width * devicePixelRatio;
         canvas.height = height * devicePixelRatio;
-
-        // Ajustar o tamanho visível do canvas para corresponder ao layout CSS
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
-
-        // Ajustar o contexto do canvas para a densidade de pixels do dispositivo
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
         // Desenhar a camada de raspadinha (a capa que será raspada)
         const capa = new Image();
-        capa.src = 'capa0.jpg'; // Imagem de cobertura (capa que será raspada)
+        capa.src = 'capa0.jpg'; // Imagem de cobertura
         capa.onload = () => {
-            ctx.drawImage(capa, 0, 0, width, height); // Ajusta a capa para o tamanho do contêiner
+            ctx.drawImage(capa, 0, 0, width, height);
         };
 
-        // Função para raspagem (limpeza da capa)
         const clearArea = (x, y) => {
-            ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada de cima (capa)
+            ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada superior
             ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2, false); // Criar um círculo para apagar
+            ctx.arc(x, y, 20, 0, Math.PI * 2, false); // Criar um círculo
             ctx.fill();
         };
 
         let isDrawing = false;
 
-        // Eventos de mouse
-        canvas.addEventListener('mousedown', (e) => {
+        // Função para ativar os eventos de toque no celular
+        const enableTouchEvents = () => {
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
+                const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
+                clearArea(x, y);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (isDrawing) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
+                    const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
+                    clearArea(x, y);
+                }
+            });
+
+            canvas.addEventListener('touchend', () => {
+                isDrawing = false;
+            });
+        };
+
+        // Função para desabilitar os eventos de mouse no desktop
+        const disableMouseEvents = () => {
+            canvas.removeEventListener('mousedown', handleMouseDown);
+            canvas.removeEventListener('mousemove', handleMouseMove);
+            canvas.removeEventListener('mouseup', handleMouseUp);
+            canvas.removeEventListener('mouseleave', handleMouseLeave);
+        };
+
+        // Eventos de mouse para desktop (caso queira habilitar novamente no futuro)
+        const handleMouseDown = (e) => {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
             const x = (e.clientX - rect.left) * devicePixelRatio;
             const y = (e.clientY - rect.top) * devicePixelRatio;
             clearArea(x, y);
-        });
+        };
 
-        canvas.addEventListener('mousemove', (e) => {
+        const handleMouseMove = (e) => {
             if (isDrawing) {
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * devicePixelRatio;
                 const y = (e.clientY - rect.top) * devicePixelRatio;
                 clearArea(x, y);
             }
-        });
+        };
 
-        canvas.addEventListener('mouseup', () => {
+        const handleMouseUp = () => {
             isDrawing = false;
-        });
+        };
 
-        canvas.addEventListener('mouseleave', () => {
+        const handleMouseLeave = () => {
             isDrawing = false;
-        });
+        };
 
-        // Suporte para telas sensíveis ao toque
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Impede a rolagem padrão
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
-            const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
-            clearArea(x, y);
-        });
+        // Verifica se o dispositivo é móvel e ativa os eventos de toque, desabilitando os de mouse
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            // Ativa os eventos de toque para dispositivos móveis
+            enableTouchEvents();
+            // Desativa os eventos de mouse para desktop
+            disableMouseEvents();
+        }
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Impede a rolagem padrão
-            if (isDrawing) {
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
-                const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
-                clearArea(x, y);
-            }
-        });
-
-        canvas.addEventListener('touchend', () => {
-            isDrawing = false;
-        });
     </script>
 </body>
 </html>
