@@ -56,32 +56,20 @@
         // Configuração inicial
         const canvas = document.getElementById('raspadinha');
         const ctx = canvas.getContext('2d');
+
+        // Ajustar o tamanho do canvas para coincidir com o container fixo (400x200)
         const container = document.getElementById('raspadinha-container');
-
-        // Ajustar a resolução do canvas para alta qualidade
-        const devicePixelRatio = window.devicePixelRatio || 1; // Captura a densidade de pixels do dispositivo
-        const width = container.offsetWidth;
-        const height = container.offsetHeight;
-
-        // Configurando o tamanho real do canvas
-        canvas.width = width * devicePixelRatio; // Tamanho interno do canvas em pixels
-        canvas.height = height * devicePixelRatio;
-
-        // Configurando o tamanho visível (CSS) do canvas
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-
-        // Ajustar o contexto para alta densidade de pixels
-        ctx.scale(devicePixelRatio, devicePixelRatio);
+        canvas.width = container.offsetWidth;
+        canvas.height = container.offsetHeight;
 
         // Desenhar a camada superior (capa da raspadinha)
         const capa = new Image();
         capa.src = 'capa0.jpg'; // Imagem de cobertura
         capa.onload = () => {
-            ctx.drawImage(capa, 0, 0, width, height); // Ajusta para o tamanho do contêiner
+            ctx.drawImage(capa, 0, 0, canvas.width, canvas.height);
         };
 
-        // Função para limpar a área (raspagem)
+        // Funções para raspagem
         const clearArea = (x, y) => {
             ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada superior
             ctx.beginPath();
@@ -91,57 +79,56 @@
 
         let isDrawing = false;
 
-        // Funções para eventos de toque (mobile)
-        const getTouchPosition = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
-            const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
-            return { x, y };
-        };
-
-        const startDrawing = (e) => {
-            isDrawing = true;
-            const { x, y } = getTouchPosition(e);
-            clearArea(x, y);
-        };
-
-        const moveDrawing = (e) => {
-            if (isDrawing) {
-                const { x, y } = getTouchPosition(e);
-                clearArea(x, y);
-            }
-        };
-
-        const stopDrawing = () => {
-            isDrawing = false;
-        };
-
-        // Eventos de toque (mobile)
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Impede a rolagem padrão
-            startDrawing(e);
-        });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Impede a rolagem padrão
-            moveDrawing(e);
-        });
-
-        canvas.addEventListener('touchend', stopDrawing);
-
-        // Eventos de mouse (para desktop)
+        // Eventos de mouse
         canvas.addEventListener('mousedown', (e) => {
-            startDrawing(e);
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            clearArea(x, y);
         });
 
         canvas.addEventListener('mousemove', (e) => {
             if (isDrawing) {
-                moveDrawing(e);
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                clearArea(x, y);
             }
         });
 
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseleave', stopDrawing);
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // Eventos de toque (mobile)
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Impede a rolagem padrão
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left;
+            const y = e.touches[0].clientY - rect.top;
+            clearArea(x, y);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Impede a rolagem padrão
+            if (isDrawing) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const y = e.touches[0].clientY - rect.top;
+                clearArea(x, y);
+            }
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault(); // Impede a rolagem padrão
+            isDrawing = false;
+        });
     </script>
 </body>
 </html>
