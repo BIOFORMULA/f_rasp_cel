@@ -25,6 +25,7 @@
             width: 400px; /* Largura fixa */
             height: 200px; /* Altura fixa */
             touch-action: none; /* Impede gestos de rolagem e zoom */
+            z-index: 10; /* Garante que o canvas e a imagem fiquem acima de outros elementos */
         }
 
         canvas {
@@ -37,9 +38,13 @@
         }
 
         img {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             border-radius: 10px;
+            z-index: -1; /* Coloca a imagem de fundo abaixo da camada de raspagem */
         }
 
         h2 {
@@ -50,7 +55,7 @@
 <body>
     <h2>Raspadinha Virtual Realista</h2>
     <div id="raspadinha-container">
-        <!-- Imagem de fundo (prêmio) -->
+        <!-- Imagem de fundo (prêmio), vai ficar abaixo da camada de raspagem -->
         <img src="atualizadopremio.png" alt="Prêmio">
         <!-- Canvas para criar a camada superior (capa que será raspada) -->
         <canvas id="raspadinha"></canvas>
