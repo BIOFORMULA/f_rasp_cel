@@ -18,14 +18,13 @@
         }
 
         #raspadinha-container {
-            position: fixed; /* Garante que o container fique fixo na tela */
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 400px;
             height: 200px;
             touch-action: none; /* Impede gestos de rolagem e zoom */
-            z-index: 10;
         }
 
         canvas {
@@ -44,7 +43,7 @@
             width: 100%;
             height: 100%;
             border-radius: 10px;
-            z-index: -1;
+            z-index: -1; /* Garantir que a imagem de fundo esteja atrás da capa */
         }
 
         h2 {
@@ -65,7 +64,7 @@
         const width = container.offsetWidth;
         const height = container.offsetHeight;
 
-        // Ajustar a resolução interna do canvas para alta qualidade
+        // Ajustar o tamanho do canvas com base na resolução de tela
         const devicePixelRatio = window.devicePixelRatio || 1;
         canvas.width = width * devicePixelRatio;
         canvas.height = height * devicePixelRatio;
@@ -73,13 +72,14 @@
         canvas.style.height = `${height}px`;
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-        // Desenhar a camada de raspadinha (a capa que será raspada)
+        // Desenhar a camada de raspadinha (capa da raspadinha)
         const capa = new Image();
         capa.src = 'capa0.jpg'; // Imagem de cobertura
         capa.onload = () => {
             ctx.drawImage(capa, 0, 0, width, height);
         };
 
+        // Função para realizar a raspagem
         const clearArea = (x, y) => {
             ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada superior
             ctx.beginPath();
@@ -89,7 +89,7 @@
 
         let isDrawing = false;
 
-        // Função para ativar os eventos de toque no celular
+        // Habilitar os eventos de toque para dispositivos móveis
         const enableTouchEvents = () => {
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -115,7 +115,7 @@
             });
         };
 
-        // Função para desabilitar os eventos de mouse no desktop
+        // Desabilitar os eventos de mouse
         const disableMouseEvents = () => {
             canvas.removeEventListener('mousedown', handleMouseDown);
             canvas.removeEventListener('mousemove', handleMouseMove);
@@ -123,36 +123,11 @@
             canvas.removeEventListener('mouseleave', handleMouseLeave);
         };
 
-        // Eventos de mouse para desktop (caso queira habilitar novamente no futuro)
-        const handleMouseDown = (e) => {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) * devicePixelRatio;
-            const y = (e.clientY - rect.top) * devicePixelRatio;
-            clearArea(x, y);
-        };
-
-        const handleMouseMove = (e) => {
-            if (isDrawing) {
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX - rect.left) * devicePixelRatio;
-                const y = (e.clientY - rect.top) * devicePixelRatio;
-                clearArea(x, y);
-            }
-        };
-
-        const handleMouseUp = () => {
-            isDrawing = false;
-        };
-
-        const handleMouseLeave = () => {
-            isDrawing = false;
-        };
-
-        // Verifica se o dispositivo é móvel e ativa os eventos de toque, desabilitando os de mouse
+        // Verifica se o dispositivo é móvel e ativa os eventos de toque
         if (window.matchMedia("(max-width: 768px)").matches) {
             // Ativa os eventos de toque para dispositivos móveis
             enableTouchEvents();
+        } else {
             // Desativa os eventos de mouse para desktop
             disableMouseEvents();
         }
