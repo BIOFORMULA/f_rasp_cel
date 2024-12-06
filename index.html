@@ -25,20 +25,19 @@
             width: 400px; /* Largura fixa */
             height: 200px; /* Altura fixa */
             touch-action: none; /* Impede gestos de rolagem e zoom */
-            pointer-events: none; /* Impede que o contêiner seja movido ao tocar */
         }
 
         canvas {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%; /* Canvas cobre totalmente o contêiner */
+            width: 100%;
             height: 100%;
             cursor: pointer;
         }
 
         img {
-            width: 100%; /* Imagem cobre totalmente o contêiner */
+            width: 100%;
             height: 100%;
             border-radius: 10px;
         }
@@ -51,9 +50,9 @@
 <body>
     <h2>Raspadinha Virtual Realista</h2>
     <div id="raspadinha-container">
-        <!-- Imagem de fundo -->
+        <!-- Imagem de fundo (prêmio) -->
         <img src="atualizadopremio.png" alt="Prêmio">
-        <!-- Canvas para criar a camada superior -->
+        <!-- Canvas para criar a camada superior (capa que será raspada) -->
         <canvas id="raspadinha"></canvas>
     </div>
     <script>
@@ -78,18 +77,18 @@
         // Ajustar o contexto do canvas para a densidade de pixels do dispositivo
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-        // Desenhar a camada superior (capa da raspadinha) com alta qualidade
+        // Desenhar a camada de raspadinha (a capa que será raspada)
         const capa = new Image();
-        capa.src = 'capa0.jpg'; // Imagem de cobertura
+        capa.src = 'capa0.jpg'; // Imagem de cobertura (capa que será raspada)
         capa.onload = () => {
             ctx.drawImage(capa, 0, 0, width, height); // Ajusta a capa para o tamanho do contêiner
         };
 
-        // Função para raspagem
+        // Função para raspagem (limpeza da capa)
         const clearArea = (x, y) => {
-            ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada superior
+            ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada de cima (capa)
             ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2, false); // Criar um círculo
+            ctx.arc(x, y, 20, 0, Math.PI * 2, false); // Criar um círculo para apagar
             ctx.fill();
         };
 
@@ -99,16 +98,16 @@
         canvas.addEventListener('mousedown', (e) => {
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = (e.clientX - rect.left) * devicePixelRatio;
+            const y = (e.clientY - rect.top) * devicePixelRatio;
             clearArea(x, y);
         });
 
         canvas.addEventListener('mousemove', (e) => {
             if (isDrawing) {
                 const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const x = (e.clientX - rect.left) * devicePixelRatio;
+                const y = (e.clientY - rect.top) * devicePixelRatio;
                 clearArea(x, y);
             }
         });
@@ -126,8 +125,8 @@
             e.preventDefault(); // Impede a rolagem padrão
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            const x = e.touches[0].clientX - rect.left;
-            const y = e.touches[0].clientY - rect.top;
+            const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
+            const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
             clearArea(x, y);
         });
 
@@ -135,14 +134,13 @@
             e.preventDefault(); // Impede a rolagem padrão
             if (isDrawing) {
                 const rect = canvas.getBoundingClientRect();
-                const x = e.touches[0].clientX - rect.left;
-                const y = e.touches[0].clientY - rect.top;
+                const x = (e.touches[0].clientX - rect.left) * devicePixelRatio;
+                const y = (e.touches[0].clientY - rect.top) * devicePixelRatio;
                 clearArea(x, y);
             }
         });
 
         canvas.addEventListener('touchend', () => {
-            e.preventDefault(); // Impede a rolagem padrão
             isDrawing = false;
         });
     </script>
