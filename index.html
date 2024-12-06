@@ -57,16 +57,29 @@
         const canvas = document.getElementById('raspadinha');
         const ctx = canvas.getContext('2d');
 
-        // Ajustar o tamanho do canvas para coincidir com o container fixo (400x200)
+        // Ajustar a resolução do canvas para alta qualidade, levando em consideração a densidade de pixels
+        const devicePixelRatio = window.devicePixelRatio || 1; // Captura a densidade de pixels do dispositivo
         const container = document.getElementById('raspadinha-container');
-        canvas.width = container.offsetWidth;
-        canvas.height = container.offsetHeight;
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
 
-        // Desenhar a camada superior (capa da raspadinha)
+        // Definir o tamanho do canvas considerando a densidade de pixels
+        canvas.width = width * devicePixelRatio;
+        canvas.height = height * devicePixelRatio;
+
+        // Ajustar o tamanho visível (CSS) do canvas
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+
+        // Ajustar o contexto do canvas para alta densidade de pixels
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        // Desenhar a camada superior (capa da raspadinha) em resolução alta
         const capa = new Image();
-        capa.src = 'capa0.jpg'; // Imagem de cobertura
+        capa.src = 'atualizadocapa.png'; // Imagem de cobertura
         capa.onload = () => {
-            ctx.drawImage(capa, 0, 0, canvas.width, canvas.height);
+            // Desenha a imagem de capa em resolução alta (considerando devicePixelRatio)
+            ctx.drawImage(capa, 0, 0, width, height); 
         };
 
         // Funções para raspagem
