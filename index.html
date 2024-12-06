@@ -18,10 +18,14 @@
         }
 
         #raspadinha-container {
-            position: relative;
+            position: fixed; /* Garante que o container fique fixo na tela */
+            top: 50%; /* Centraliza o contêiner verticalmente */
+            left: 50%; /* Centraliza o contêiner horizontalmente */
+            transform: translate(-50%, -50%); /* Ajusta para o centro exato */
             width: 400px; /* Largura fixa */
             height: 200px; /* Altura fixa */
             touch-action: none; /* Impede gestos de rolagem e zoom */
+            pointer-events: none; /* Impede que o contêiner seja movido ao tocar */
         }
 
         canvas {
@@ -47,9 +51,9 @@
 <body>
     <h2>Raspadinha Virtual Realista</h2>
     <div id="raspadinha-container">
-        <!-- Imagem de fundo (prêmio) -->
+        <!-- Imagem de fundo -->
         <img src="atualizadopremio.png" alt="Prêmio">
-        <!-- Canvas para criar a camada de raspagem -->
+        <!-- Canvas para criar a camada superior -->
         <canvas id="raspadinha"></canvas>
     </div>
     <script>
@@ -57,32 +61,31 @@
         const canvas = document.getElementById('raspadinha');
         const ctx = canvas.getContext('2d');
 
-        // Ajustar a resolução do canvas para alta qualidade, levando em consideração a densidade de pixels
-        const devicePixelRatio = window.devicePixelRatio || 1; // Captura a densidade de pixels do dispositivo
+        // Ajustar o tamanho do canvas para coincidir com o container fixo (400x200)
         const container = document.getElementById('raspadinha-container');
         const width = container.offsetWidth;
         const height = container.offsetHeight;
 
-        // Definir o tamanho do canvas considerando a densidade de pixels
+        // Ajustar a resolução interna do canvas para alta qualidade
+        const devicePixelRatio = window.devicePixelRatio || 1;
         canvas.width = width * devicePixelRatio;
         canvas.height = height * devicePixelRatio;
 
-        // Ajustar o tamanho visível (CSS) do canvas
+        // Ajustar o tamanho visível do canvas para corresponder ao layout CSS
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
 
-        // Ajustar o contexto do canvas para alta densidade de pixels
+        // Ajustar o contexto do canvas para a densidade de pixels do dispositivo
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-        // Desenhar a camada superior (capa da raspadinha) em resolução alta
+        // Desenhar a camada superior (capa da raspadinha) com alta qualidade
         const capa = new Image();
-        capa.src = 'atualizadocapa.png'; // Imagem de cobertura
+        capa.src = 'capa0.jpg'; // Imagem de cobertura
         capa.onload = () => {
-            // Desenha a imagem de capa em resolução alta (considerando devicePixelRatio)
-            ctx.drawImage(capa, 0, 0, width, height); 
+            ctx.drawImage(capa, 0, 0, width, height); // Ajusta a capa para o tamanho do contêiner
         };
 
-        // Funções para raspagem
+        // Função para raspagem
         const clearArea = (x, y) => {
             ctx.globalCompositeOperation = 'destination-out'; // Apagar a camada superior
             ctx.beginPath();
@@ -118,7 +121,7 @@
             isDrawing = false;
         });
 
-        // Eventos de toque (mobile)
+        // Suporte para telas sensíveis ao toque
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault(); // Impede a rolagem padrão
             isDrawing = true;
@@ -138,7 +141,7 @@
             }
         });
 
-        canvas.addEventListener('touchend', (e) => {
+        canvas.addEventListener('touchend', () => {
             e.preventDefault(); // Impede a rolagem padrão
             isDrawing = false;
         });
